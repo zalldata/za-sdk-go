@@ -109,6 +109,28 @@ func (za *ZallAnalytics) Close() {
 	za.C.Close()
 }
 
+func (za *ZallAnalytics) TrackWx(unionId, openId, event string, properties map[string]interface{}) error {
+	var nproperties map[string]interface{}
+
+	// merge properties
+	if properties == nil {
+		nproperties = make(map[string]interface{})
+	} else {
+		nproperties = utils.DeepCopy(properties)
+	}
+	nproperties["$originalIdType"] = 3
+	nproperties["$distinctIdType"] = 4
+
+	// merge super properties
+	if superProperties != nil {
+		utils.MergeSuperProperty(superProperties, nproperties)
+	}
+	nproperties["$lib"] = LIB_NAME
+	nproperties["$lib_version"] = SDK_VERSION
+
+	return za.track(TRACK, event, unionId, openId, nproperties, false)
+}
+
 func (za *ZallAnalytics) Track(distinctId, event string, properties map[string]interface{}, isLoginId bool) error {
 	var nproperties map[string]interface{}
 
@@ -159,6 +181,30 @@ func (za *ZallAnalytics) ProfileSet(distinctId string, properties map[string]int
 	}
 
 	return za.track(PROFILE_SET, "", distinctId, "", nproperties, isLoginId)
+}
+func (za *ZallAnalytics) ProfileSetWXOpenId(openId string, properties map[string]interface{}, isLoginId bool) error {
+	var nproperties map[string]interface{}
+
+	if properties == nil {
+		return errors.New("property should not be nil")
+	} else {
+		nproperties = utils.DeepCopy(properties)
+	}
+	nproperties["$distinctIdType"] = 4
+	return za.track(PROFILE_SET, "", openId, "", nproperties, isLoginId)
+}
+
+func (za *ZallAnalytics) ProfileSetWXUnionId(unionID string, properties map[string]interface{}, isLoginId bool) error {
+	var nproperties map[string]interface{}
+
+	if properties == nil {
+		return errors.New("property should not be nil")
+	} else {
+		nproperties = utils.DeepCopy(properties)
+	}
+	nproperties["$distinctIdType"] = 3
+
+	return za.track(PROFILE_SET, "", unionID, "", nproperties, isLoginId)
 }
 
 func (za *ZallAnalytics) ProfileSetOnce(distinctId string, properties map[string]interface{}, isLoginId bool) error {
