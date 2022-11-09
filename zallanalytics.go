@@ -47,7 +47,7 @@ const (
 	BIND_OPEN_ID     = 4
 	BIND_EXTERNAL_ID = 5
 
-	SDK_VERSION = "1.0.2"
+	SDK_VERSION = "1.0.3"
 	LIB_NAME    = "Golang"
 
 	MAX_ID_LEN = 255
