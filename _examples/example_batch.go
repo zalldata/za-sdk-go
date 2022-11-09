@@ -35,7 +35,7 @@ func main() {
 	za := sdk.InitZallAnalytics(c, "z7adds", false)
 	defer za.Close()
 
-	//distinctId := "ABCDEF123456"
+	distinctId := "ABCDEF123456"
 	openId := "openId"
 	unionId := "unionId"
 
@@ -47,33 +47,23 @@ func main() {
 		"IzaddedToFav":   true,
 	}
 
-	err = za.TrackWx(unionId, openId, event, properties)
+	err = za.Track(unionId, event, properties, false)
 	if err != nil {
 		fmt.Println("track failed", err)
 		return
 	}
 
-	//userProperties := map[string]interface{}{
-	//
-	//	"userInfo": "pid",
-	//}
-	//
-	//err = za.ProfileSetWXOpenId(openId, userProperties, true)
-	//if err != nil {
-	//	fmt.Println("track failed", err)
-	//	return
-	//}
-	//err = za.ProfileSetWXUnionId(unionId, userProperties, true)
-	//if err != nil {
-	//	fmt.Println("track failed", err)
-	//	return
-	//}
-	//
-	//err = za.ProfileSet(distinctId, userProperties, true)
-	//if err != nil {
-	//	fmt.Println("track failed", err)
-	//	return
-	//}
+	err = za.TrackSignup(unionId, openId, sdk.BIND_UNION_ID, sdk.BIND_OPEN_ID)
+	if err != nil {
+		fmt.Println("track failed", err)
+		return
+	}
+
+	err = za.ProfileSet(distinctId, sdk.BIND_LOGIN_ID, properties, true)
+	if err != nil {
+		fmt.Println("track failed", err)
+		return
+	}
 
 	fmt.Println("track done")
 }
