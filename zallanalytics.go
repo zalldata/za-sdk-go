@@ -118,8 +118,8 @@ func (za *ZallAnalytics) TrackWx(unionId, openId, event string, properties map[s
 	} else {
 		nproperties = utils.DeepCopy(properties)
 	}
-	nproperties["$originalIdType"] = 3
-	nproperties["$distinctIdType"] = 4
+	nproperties["$originalIdType"] = 4
+	nproperties["$distinctIdType"] = 3
 
 	// merge super properties
 	if superProperties != nil {
