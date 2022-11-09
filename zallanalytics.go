@@ -40,7 +40,14 @@ const (
 	ITEM_SET          = "item_set"
 	ITEM_DELETE       = "item_delete"
 
-	SDK_VERSION = "1.0.1"
+	BIND_DEVICE_ID   = 0
+	BIND_LOGIN_ID    = 1
+	BIND_MOBILE      = 2
+	BIND_UNION_ID    = 3
+	BIND_OPEN_ID     = 4
+	BIND_EXTERNAL_ID = 5
+
+	SDK_VERSION = "1.0.2"
 	LIB_NAME    = "Golang"
 
 	MAX_ID_LEN = 255
@@ -109,28 +116,6 @@ func (za *ZallAnalytics) Close() {
 	za.C.Close()
 }
 
-func (za *ZallAnalytics) TrackWx(unionId, openId, event string, properties map[string]interface{}) error {
-	var nproperties map[string]interface{}
-
-	// merge properties
-	if properties == nil {
-		nproperties = make(map[string]interface{})
-	} else {
-		nproperties = utils.DeepCopy(properties)
-	}
-	nproperties["$originalIdType"] = 4
-	nproperties["$distinctIdType"] = 3
-
-	// merge super properties
-	if superProperties != nil {
-		utils.MergeSuperProperty(superProperties, nproperties)
-	}
-	nproperties["$lib"] = LIB_NAME
-	nproperties["$lib_version"] = SDK_VERSION
-
-	return za.track(TRACK, event, unionId, openId, nproperties, false)
-}
-
 func (za *ZallAnalytics) Track(distinctId, event string, properties map[string]interface{}, isLoginId bool) error {
 	var nproperties map[string]interface{}
 
@@ -151,7 +136,7 @@ func (za *ZallAnalytics) Track(distinctId, event string, properties map[string]i
 	return za.track(TRACK, event, distinctId, "", nproperties, isLoginId)
 }
 
-func (za *ZallAnalytics) TrackSignup(distinctId, originId string) error {
+func (za *ZallAnalytics) TrackSignup(distinctId, originId string, distinctIdType, originIdType int) error {
 	// check originId and merge properties
 	if originId == "" {
 		return errors.New("property [original_id] must not be empty")
@@ -168,10 +153,13 @@ func (za *ZallAnalytics) TrackSignup(distinctId, originId string) error {
 	properties["$lib"] = LIB_NAME
 	properties["$lib_version"] = SDK_VERSION
 
+	properties["$distinctIdType"] = distinctIdType
+	properties["$originalIdType"] = originIdType
+
 	return za.track(TRACK_SIGNUP, "$SignUp", distinctId, originId, properties, false)
 }
 
-func (za *ZallAnalytics) ProfileSet(distinctId string, properties map[string]interface{}, isLoginId bool) error {
+func (za *ZallAnalytics) ProfileSet(distinctId string, distinctIdType int, properties map[string]interface{}, isLoginId bool) error {
 	var nproperties map[string]interface{}
 
 	if properties == nil {
@@ -179,32 +167,8 @@ func (za *ZallAnalytics) ProfileSet(distinctId string, properties map[string]int
 	} else {
 		nproperties = utils.DeepCopy(properties)
 	}
-
+	nproperties["$distinctIdType"] = distinctIdType
 	return za.track(PROFILE_SET, "", distinctId, "", nproperties, isLoginId)
-}
-func (za *ZallAnalytics) ProfileSetWXOpenId(openId string, properties map[string]interface{}, isLoginId bool) error {
-	var nproperties map[string]interface{}
-
-	if properties == nil {
-		return errors.New("property should not be nil")
-	} else {
-		nproperties = utils.DeepCopy(properties)
-	}
-	nproperties["$distinctIdType"] = 4
-	return za.track(PROFILE_SET, "", openId, "", nproperties, isLoginId)
-}
-
-func (za *ZallAnalytics) ProfileSetWXUnionId(unionID string, properties map[string]interface{}, isLoginId bool) error {
-	var nproperties map[string]interface{}
-
-	if properties == nil {
-		return errors.New("property should not be nil")
-	} else {
-		nproperties = utils.DeepCopy(properties)
-	}
-	nproperties["$distinctIdType"] = 3
-
-	return za.track(PROFILE_SET, "", unionID, "", nproperties, isLoginId)
 }
 
 func (za *ZallAnalytics) ProfileSetOnce(distinctId string, properties map[string]interface{}, isLoginId bool) error {

@@ -23,41 +23,57 @@ import (
 )
 
 func main() {
-	c, err := sdk.InitBatchConsumer("http://172.16.90.61:58080/a?service=zall&project=dddssss", 3, 1000)
+	//https://logcollect.zalldata.cn/a?project=iccvigrt&service=fl&token=21c6761a470d3a01a1e1c3ffcfcec751
+	c, err := sdk.InitBatchConsumer("http://logcollect.zalldata.cn/a?service=zall&project=z7adds", 3, 1000)
+
+	//c, err := sdk.InitBatchConsumer("http://172.16.90.61:58080/a?service=zall&project=dddssss", 3, 1000)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	za := sdk.InitZallAnalytics(c, "default", false)
+	za := sdk.InitZallAnalytics(c, "z7adds", false)
 	defer za.Close()
 
-	distinctId := "ABCDEF123456"
+	//distinctId := "ABCDEF123456"
+	openId := "openId"
+	unionId := "unionId"
+
 	event := "ViewProduct"
 	properties := map[string]interface{}{
 		"$ip":            "2.2.2.2",
-		"ProductId":      "123456",
+		"ProductId":      "1234562",
 		"ProductCatalog": "Laptop Computer",
 		"IzaddedToFav":   true,
 	}
 
-	err = za.Track(distinctId, event, properties, true)
+	err = za.TrackWx(unionId, openId, event, properties)
 	if err != nil {
 		fmt.Println("track failed", err)
 		return
 	}
 
-	err = za.Track(distinctId, event, properties, true)
-	if err != nil {
-		fmt.Println("track failed", err)
-		return
-	}
-
-	err = za.Track(distinctId, event, properties, true)
-	if err != nil {
-		fmt.Println("track failed", err)
-		return
-	}
+	//userProperties := map[string]interface{}{
+	//
+	//	"userInfo": "pid",
+	//}
+	//
+	//err = za.ProfileSetWXOpenId(openId, userProperties, true)
+	//if err != nil {
+	//	fmt.Println("track failed", err)
+	//	return
+	//}
+	//err = za.ProfileSetWXUnionId(unionId, userProperties, true)
+	//if err != nil {
+	//	fmt.Println("track failed", err)
+	//	return
+	//}
+	//
+	//err = za.ProfileSet(distinctId, userProperties, true)
+	//if err != nil {
+	//	fmt.Println("track failed", err)
+	//	return
+	//}
 
 	fmt.Println("track done")
 }
